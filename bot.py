@@ -7,27 +7,27 @@ Avvisa quando esce un nuovo film d'animazione:
   * al cinema in Italia (film appena usciti, senza anteprime);
   * sulle piattaforme streaming in Italia (film arrivati da poco).
 
-Dati: TMDB (The Movie Database), API gratuita.[span_1](start_span)[span_1](end_span)
-Dipendenze: solo libreria standard di Python 3.8+ (nessun pip install).[span_2](start_span)[span_2](end_span)
+Dati: TMDB (The Movie Database), API gratuita.
+Dipendenze: solo libreria standard di Python 3.8+ (nessun pip install).
 
 Variabili d'ambiente
-  TELEGRAM_TOKEN    obbligatoria  token del bot (da @BotFather)[span_3](start_span)[span_3](end_span)
-  TMDB_API_KEY      obbligatoria  chiave gratuita TMDB (v3 oppure token v4)[span_4](start_span)[span_4](end_span)
-  TELEGRAM_CHAT_ID  facoltativa   a chi mandare il digest (default: la tua chat)[span_5](start_span)[span_5](end_span)
-  REGIONE           facoltativa   default IT[span_6](start_span)[span_6](end_span)
-  LINGUA            facoltativa   default it-IT[span_7](start_span)[span_7](end_span)
-  GIORNI_CINEMA     facoltativa   default 3   (quanti giorni indietro guardare:[span_8](start_span)[span_8](end_span)
-                                  avvisa solo film gia' usciti, niente anteprime)[span_9](start_span)[span_9](end_span)
-  GIORNI_CATALOGO   facoltativa   default 270 (quanto indietro guardare per lo streaming)[span_10](start_span)[span_10](end_span)
-  STATE_FILE        facoltativa   default stato.json (titoli gia' inviati)[span_11](start_span)[span_11](end_span)
-  INVIA_SE_VUOTO    facoltativa   1 per mandare anche "nessuna novita'[span_12](start_span)"[span_12](end_span)
+  TELEGRAM_TOKEN    obbligatoria  token del bot (da @BotFather)
+  TMDB_API_KEY      obbligatoria  chiave gratuita TMDB (v3 oppure token v4)
+  TELEGRAM_CHAT_ID  facoltativa   a chi mandare il digest (default: la tua chat)
+  REGIONE           facoltativa   default IT
+  LINGUA            facoltativa   default it-IT
+  GIORNI_CINEMA     facoltativa   default 3   (quanti giorni indietro guardare:
+                                  avvisa solo film gia' usciti, niente anteprime)
+  GIORNI_CATALOGO   facoltativa   default 270 (quanto indietro guardare per lo streaming)
+  STATE_FILE        facoltativa   default stato.json (titoli gia' inviati)
+  INVIA_SE_VUOTO    facoltativa   1 per mandare anche "nessuna novita'"
 
 Uso
-  python bot.py --once       esegue un giro e invia se c'e' qualcosa di nuovo[span_13](start_span)[span_13](end_span)
-  python bot.py --dry-run    esegue un giro e stampa il messaggio, senza inviare[span_14](start_span)[span_14](end_span)
-  python bot.py --test       invia un messaggio di prova[span_15](start_span)[span_15](end_span)
-  python bot.py --chat-id    stampa l'id della chat da cui scrivere al bot[span_16](start_span)[span_16](end_span)
-  python bot.py --loop       resta acceso: digest ogni giorno + comandi /oggi /start[span_17](start_span)[span_17](end_span)
+  python bot.py --once       esegue un giro e invia se c'e' qualcosa di nuovo
+  python bot.py --dry-run    esegue un giro e stampa il messaggio, senza inviare
+  python bot.py --test       invia un messaggio di prova
+  python bot.py --chat-id    stampa l'id della chat da cui scrivere al bot
+  python bot.py --loop       resta acceso: digest ogni giorno + comandi /oggi /start
 """
 
 from __future__ import annotations
@@ -58,11 +58,11 @@ def env(nome: str, default: str = "") -> str:
 
 TELEGRAM_TOKEN = env("TELEGRAM_TOKEN")
 TMDB_KEY = env("TMDB_API_KEY")
-CHAT_ID = env("TELEGRAM_CHAT_ID", "8798296477")   # la tua chat[span_18](start_span)[span_18](end_span)
-REGIONE = env("REGIONE", "IT")[span_19](start_span)[span_19](end_span)
-LINGUA = env("LINGUA", "it-IT")[span_20](start_span)[span_20](end_span)
-STATE_FILE = env("STATE_FILE", "stato.json")[span_21](start_span)[span_21](end_span)
-INVIA_SE_VUOTO = env("INVIA_SE_VUOTO", "0") not in ("0", "", "no", "false")[span_22](start_span)[span_22](end_span)
+CHAT_ID = env("TELEGRAM_CHAT_ID", "8798296477")   # la tua chat
+REGIONE = env("REGIONE", "IT")
+LINGUA = env("LINGUA", "it-IT")
+STATE_FILE = env("STATE_FILE", "stato.json")
+INVIA_SE_VUOTO = env("INVIA_SE_VUOTO", "0") not in ("0", "", "no", "false")
 
 def intero(nome: str, default: int) -> int:
     try:
@@ -71,9 +71,9 @@ def intero(nome: str, default: int) -> int:
         return default
 
 
-GIORNI_CINEMA = intero("GIORNI_CINEMA", 3)[span_23](start_span)[span_23](end_span)
-VERSIONE_CINEMA = "v2:"      # chiave di stato: cambia se cambia il criterio[span_24](start_span)[span_24](end_span)
-GIORNI_CATALOGO = intero("GIORNI_CATALOGO", 270)[span_25](start_span)[span_25](end_span)
+GIORNI_CINEMA = intero("GIORNI_CINEMA", 3)
+VERSIONE_CINEMA = "v2:"      # chiave di stato: cambia se cambia il criterio
+GIORNI_CATALOGO = intero("GIORNI_CATALOGO", 270)
 
 
 def log(*parti) -> None:
@@ -95,14 +95,14 @@ def _richiesta(url: str, dati: bytes | None = None, header: dict | None = None) 
 
 
 def tmdb(percorso: str, parametri: dict | None = None) -> dict:
-    """Chiamata GET a TMDB. Supporta chiave v3 (?api_key=) e token v4 (Bearer).""[span_26](start_span)"[span_26](end_span)
+    """Chiamata GET a TMDB. Supporta chiave v3 (?api_key=) e token v4 (Bearer)."""
     if not TMDB_KEY:
-        raise RuntimeError("Manca TMDB_API_KEY")[span_27](start_span)[span_27](end_span)
+        raise RuntimeError("Manca TMDB_API_KEY")
     parametri = dict(parametri or {})
     parametri.setdefault("language", LINGUA)
     url = f"{TMDB_BASE}{percorso}"
     header = {}
-    if "." in TMDB_KEY:  # token v4 (JWT)[span_28](start_span)[span_28](end_span)
+    if "." in TMDB_KEY:  # token v4 (JWT)
         header["Authorization"] = f"Bearer {TMDB_KEY}"
     else:
         parametri["api_key"] = TMDB_KEY
@@ -116,7 +116,7 @@ def tmdb(percorso: str, parametri: dict | None = None) -> dict:
 
 def telegram(metodo: str, **parametri):
     if not TELEGRAM_TOKEN:
-        raise RuntimeError("Manca TELEGRAM_TOKEN")[span_29](start_span)[span_29](end_span)
+        raise RuntimeError("Manca TELEGRAM_TOKEN")
     url = TG_BASE.format(token=TELEGRAM_TOKEN, method=metodo)
     dati = json.dumps(parametri).encode("utf-8")
     try:
@@ -139,7 +139,7 @@ def invia(testo: str, chat_id: str | int) -> None:
 
 
 def trova_chat_id() -> str | None:
-    """Ultima chat privata che ha scritto al bot (dopo /start).""[span_30](start_span)"[span_30](end_span)
+    """Ultima chat privata che ha scritto al bot (dopo /start)."""
     if CHAT_ID:
         return CHAT_ID
     try:
@@ -161,11 +161,11 @@ def trova_chat_id() -> str | None:
 
 def film_al_cinema(oggi: date) -> list[dict]:
     """Film d'animazione GIA' usciti in sala in Italia negli ultimi giorni.
-    Nessuna anteprima: chi non e' ancora in sala non viene segnalato.""[span_31](start_span)"[span_31](end_span)
+    Nessuna anteprima: chi non e' ancora in sala non viene segnalato."""
     dati = tmdb("/discover/movie", {
         "with_genres": GENERE_ANIMAZIONE,
         "region": REGIONE,
-        "with_release_type": "2|3",       # 2 = sale limitate, 3 = sale[span_32](start_span)[span_32](end_span)
+        "with_release_type": "2|3",       # 2 = sale limitate, 3 = sale
         "release_date.gte": (oggi - timedelta(days=GIORNI_CINEMA)).isoformat(),
         "release_date.lte": oggi.isoformat(),
         "sort_by": "popularity.desc",
@@ -176,7 +176,7 @@ def film_al_cinema(oggi: date) -> list[dict]:
 
 def film_in_streaming(oggi: date) -> list[dict]:
     """Film d'animazione disponibili in abbonamento su una piattaforma in Italia,
-    ordinati dal più recente: i nuovi arrivi finiscono in cima.""[span_33](start_span)"[span_33](end_span)
+    ordinati dal più recente: i nuovi arrivi finiscono in cima."""
     dati = tmdb("/discover/movie", {
         "with_genres": GENERE_ANIMAZIONE,
         "watch_region": REGIONE,
@@ -193,7 +193,7 @@ def film_in_streaming(oggi: date) -> list[dict]:
 
 
 def piattaforme(movie_id: int) -> tuple[list[str], str | None]:
-    """Nomi delle piattaforme in abbonamento in Italia + link JustWatch.""[span_34](start_span)"[span_34](end_span)
+    """Nomi delle piattaforme in abbonamento in Italia + link JustWatch."""
     try:
         dati = tmdb(f"/movie/{movie_id}/watch/providers")
     except RuntimeError as e:
@@ -205,7 +205,7 @@ def piattaforme(movie_id: int) -> tuple[list[str], str | None]:
         nome = (voce.get("provider_name") or "").strip()
         if not nome:
             continue
-        # "Netflix Amazon Channel" e simili sono doppioni: tengo solo il canale principale[span_35](start_span)[span_35](end_span)
+        # "Netflix Amazon Channel" e simili sono doppioni: tengo solo il canale principale
         if nome.endswith("Amazon Channel"):
             continue
         if nome not in nomi:
@@ -302,7 +302,7 @@ def componi_messaggio(oggi: date, novo_cinema: list, novo_streaming: list) -> st
 
 
 def prepara(oggi: date) -> tuple[str, dict, int, int]:
-    """Raccoglie le novità, aggiorna lo stato e restituisce il messaggio.""[span_36](start_span)"[span_36](end_span)
+    """Raccoglie le novità, aggiorna lo stato e restituisce il messaggio."""
     stato = carica_stato()
     gia_visti_cinema = stato["cinema"]
     gia_visti_streaming = stato["streaming"]
@@ -326,16 +326,16 @@ def prepara(oggi: date) -> tuple[str, dict, int, int]:
     log("Cerco le novità in streaming...")
     novo_streaming: list[dict] = []
     candidati = [f for f in film_in_streaming(oggi) if str(f.get("id")) not in gia_visti_streaming]
-    # segno come visti TUTTI i candidati di oggi: cosi' domani non ricompaiono a gruppi di 8[span_37](start_span)[span_37](end_span)
+    # segno come visti TUTTI i candidati di oggi: cosi' domani non ricompaiono a gruppi di 8
     for film in candidati:
         stato["streaming"][str(film.get("id"))] = oggi.isoformat()
-    for film in candidati[:12]:                      # limite chiamate provider[span_38](start_span)[span_38](end_span)
+    for film in candidati[:12]:                      # limite chiamate provider
         movie_id = int(film["id"])
         if dura_meno_di_40_minuti(movie_id):
             continue
         nomi, link = piattaforme(movie_id)
         if not nomi:
-            continue                                 # nessuna piattaforma in Italia[span_39](start_span)[span_39](end_span)
+            continue                                 # nessuna piattaforma in Italia
         novo_streaming.append({
             "id": film.get("id"),
             "titolo": film.get("title") or film.get("original_title") or "?",
@@ -410,7 +410,7 @@ def comando_chat_id() -> int:
 
 
 def comando_loop() -> int:
-    """Resta acceso: risponde ai comandi e manda il digest ogni giorno.""[span_40](start_span)"[span_40](end_span)
+    """Resta acceso: risponde ai comandi e manda il digest ogni giorno."""
     log("Bot in ascolto. Comandi: /start /oggi /help")
     offset = None
     ultimo_giorno = None
@@ -459,17 +459,17 @@ def comando_loop() -> int:
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description="Bot Telegram per le novità di film d'animazione")[span_41](start_span)[span_41](end_span)
+    parser = argparse.ArgumentParser(description="Bot Telegram per le novità di film d'animazione")
     gruppo = parser.add_mutually_exclusive_group()
-    gruppo.add_argument("--once", action="store_true", help="un giro e invio (default)")[span_42](start_span)[span_42](end_span)
-    gruppo.add_argument("--dry-run", action="store_true", help="un giro senza inviare")[span_43](start_span)[span_43](end_span)
-    gruppo.add_argument("--test", action="store_true", help="messaggio di prova")[span_44](start_span)[span_44](end_span)
-    gruppo.add_argument("--chat-id", action="store_true", help="mostra l'id della chat")[span_45](start_span)[span_45](end_span)
-    gruppo.add_argument("--loop", action="store_true", help="resta acceso con comandi e digest")[span_46](start_span)[span_46](end_span)
+    gruppo.add_argument("--once", action="store_true", help="un giro e invio (default)")
+    gruppo.add_argument("--dry-run", action="store_true", help="un giro senza inviare")
+    gruppo.add_argument("--test", action="store_true", help="messaggio di prova")
+    gruppo.add_argument("--chat-id", action="store_true", help="mostra l'id della chat")
+    gruppo.add_argument("--loop", action="store_true", help="resta acceso con comandi e digest")
     args = parser.parse_args(argv)
 
     if not TELEGRAM_TOKEN:
-        log("Manca TELEGRAM_TOKEN: impostalo nelle variabili d'ambiente.")[span_47](start_span)[span_47](end_span)
+        log("Manca TELEGRAM_TOKEN: impostalo nelle variabili d'ambiente.")
         return 2
 
     if args.test:
