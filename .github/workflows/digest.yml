@@ -1,4 +1,4 @@
-```
+
 name: Digest animazione
 
 *07:00 UTC = 09:00 in Italia d'estate, 08:00 d'inverno*
@@ -37,4 +37,3 @@ jobs:
             git commit -m "stato aggiornato"
             git push
           fi
-```
