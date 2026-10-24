@@ -1,11 +1,10 @@
-
 name: Digest animazione
 
-#07:00 UTC = 09:00 in Italia d'estate, 08:00 d'inverno
-on :
-schedule:
-- cron: "13 7 * * *" 
-workflow_dispatch:
+*07:00 UTC = 09:00 in Italia d'estate, 08:00 d'inverno*
+on:
+  schedule:
+    - cron: "13 7 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -22,11 +21,21 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Cerca le novita' e invia su Telegram
+      - name: Cerca il programma e invia il digest
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-        run: python bot.py --once
+        run: |
+          FILE=$(find . -name bot.py -not -path './.git/*' | head -n 1)
+          if [ -z "$FILE" ]; then
+            FILE=$(find . -name '*.py' -not -path './.git/*' | head -n 1)
+          fi
+          if [ -z "$FILE" ]; then
+            echo "nessun file .py trovato nel repository"
+            exit 1
+          fi
+          echo "Uso $FILE"
+          python "$FILE" --once
 
       - name: Salva lo stato
         run: |
@@ -37,3 +46,4 @@ jobs:
             git commit -m "stato aggiornato"
             git push
           fi
+```
