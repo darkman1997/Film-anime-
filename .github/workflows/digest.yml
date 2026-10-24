@@ -2,10 +2,10 @@
 name: Digest animazione
 
 #07:00 UTC = 09:00 in Italia d'estate, 08:00 d'inverno
-on:
-  schedule:
-    - cron: "0 7 * * *"
-  workflow_dispatch:
+on :
+schedule:
+- cron: "13 7 * * *" 
+workflow_dispatch:
 
 permissions:
   contents: write
