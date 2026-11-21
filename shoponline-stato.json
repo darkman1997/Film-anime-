@@ -1,0 +1,18 @@
+{
+  "attivo": true,
+  "last_update_id": 58940423,
+  "mod": null,
+  "richieste": [
+    {
+      "escludi": [],
+      "esistenti_cercati": true,
+      "pausa": false,
+      "q": "pc",
+      "rimborso_min": 0,
+      "solo_acquisto": false
+    }
+  ],
+  "ultima_aggiunta": "pc|0|0|",
+  "ultimo_giro": "2026-11-21T08:16",
+  "ultimo_post_id": 69423
+}
