@@ -1,6 +1,6 @@
 {
   "attivo": true,
-  "last_update_id": 58940423,
+  "last_update_id": 58940427,
   "mod": null,
   "richieste": [
     {
@@ -12,7 +12,6 @@
       "solo_acquisto": false
     }
   ],
-  "ultima_aggiunta": "pc|0|0|",
-  "ultimo_giro": "2026-11-21T08:16",
-  "ultimo_post_id": 69423
+  "ultimo_giro": "2026-11-21T08:23",
+  "ultimo_post_id": 69424
 }
