@@ -1,0 +1,41 @@
+name: Digest animazione
+
+# 10:25 UTC = 11:25 in Italia (ora solare) / 12:25 (ora legale)
+on:
+  schedule:
+    - cron: "25 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica il codice
+        uses: actions/checkout@v4
+      - name: Prepara Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Cerca il programma e invia il digest
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: python bot.py --once
+      - name: Salva lo stato
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain stato.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add stato.json
+            git commit -m "stato aggiornato"
+            for tentativo in 1 2 3 4; do
+              git fetch origin main
+              git rebase origin/main || { git rebase --abort; git checkout -- .; git reset --hard origin/main; }
+              git push && break
+              sleep 5
+            done
+          fi
